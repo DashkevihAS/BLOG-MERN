@@ -1,6 +1,9 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import mongoose from 'mongoose';
+import { registerValidation } from './validations/auth.js';
+import { validationResult } from 'express-validator';
+import UserModel from './models/User.js';
 
 mongoose
   .connect(
@@ -15,10 +18,20 @@ const PORT = 4444;
 
 app.use(express.json());
 
-app.post('/registrtion', (req, res) => {
-  const { login, password } = req.body;
+app.post('/registration', registerValidation, (req, res) => {
+  const errors = validationResult(req);
 
-  const token = jwt.sign({ login, email: 'example@email.com' }, 'secret123');
+  if (!errors.isEmpty()) {
+    return res.status(400).json(errors.array());
+  }
+
+  const { email, password, fullName, avatarURL } = req.body;
+
+  const user = new UserModel({ email, password, fullName, avatarURL });
+
+  res.json({ success: true });
+
+  // const token = jwt.sign({ login, email: 'example@email.com' }, 'secret123');
 
   res.json({
     success: true,
