@@ -1,4 +1,5 @@
 import express from 'express';
+import multer from 'multer';
 import mongoose from 'mongoose';
 
 import {
@@ -15,6 +16,7 @@ import {
   deletePost,
   updatePost,
 } from './controllers/PostController.js';
+import handleValidationErrors from './utils/handleValidationErrors.js';
 
 mongoose
   .connect(
@@ -24,19 +26,64 @@ mongoose
   .catch((error) => console.log('Mongo error:', error));
 
 const app = express();
+
+// создаем хранилище для multer
+const storage = multer.diskStorage({
+  //когда будет любой файл загружаться, выполнится функция
+  // которая вернет путь к файлу
+  destination: (_, __, cb) => {
+    cb(null, './server/uploads');
+  },
+  // перед тем как этот файл сохранить,
+  //функция обьяснит как назвать этот файл
+  filename: (_, file, cb) => {
+    cb(null, file.originalname);
+  },
+});
+// создаем функцию которая позволит использовать multer
+const upload = multer({ storage });
+
 app.use(express.json());
+
+// чтобы при запросе /uploads/картинка.jpg находило файл в нужной папке
+app.use('/uploads', express.static('./server/uploads'));
 
 const PORT = 4444;
 
-app.post('/auth/registration', registerValidation, register);
-app.post('/auth/login', loginValidation, login);
+app.post(
+  '/auth/registration',
+  registerValidation,
+  handleValidationErrors,
+  register,
+);
+app.post('/auth/login', loginValidation, handleValidationErrors, login);
 app.get('/auth/me', checkAuth, getMe);
+
+// если придет такой запрос, то мы сначала используем мидлвор из multer
+// ожидаем файл под названием image (свойсво image с картинкой )
+app.post('/upload', checkAuth, upload.single('image'), (req, res) => {
+  res.json({
+    url: `/uploads/${req.file.originalname}`,
+  });
+});
 
 app.get('/posts', getAllPosts);
 app.get('/posts/:id', getOnePost);
-app.post('/posts', checkAuth, postCreateValidation, createPost);
+app.post(
+  '/posts',
+  checkAuth,
+  postCreateValidation,
+  handleValidationErrors,
+  createPost,
+);
 app.delete('/posts/:id', checkAuth, deletePost);
-app.patch('/posts/:id', checkAuth, updatePost);
+app.patch(
+  '/posts/:id',
+  checkAuth,
+  postCreateValidation,
+  handleValidationErrors,
+  updatePost,
+);
 
 app.listen(PORT, (error) => {
   if (error) {
