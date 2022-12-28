@@ -2,12 +2,14 @@ import express from 'express';
 import multer from 'multer';
 import mongoose from 'mongoose';
 
+import checkAuth from './utils/checkAuth.js';
+import handleValidationErrors from './utils/handleValidationErrors.js';
 import {
   registerValidation,
   loginValidation,
   postCreateValidation,
 } from './validations.js';
-import checkAuth from './utils/checkAuth.js';
+
 import { getMe, login, register } from './controllers/UserController.js';
 import {
   createPost,
@@ -16,7 +18,6 @@ import {
   deletePost,
   updatePost,
 } from './controllers/PostController.js';
-import handleValidationErrors from './utils/handleValidationErrors.js';
 
 mongoose
   .connect(
