@@ -112,3 +112,20 @@ export const updatePost = async (req, res) => {
     console.log(error);
   }
 };
+
+export const getLastTags = async (req, res) => {
+  try {
+    //.populate('user').exec() чтобы подхватить данные из user
+    const posts = await PostModel.find().limit(5).exec();
+
+    const tags = posts
+      .map((post) => post.tags) // получаем массив массивов
+      .slice(0, 5)
+      .flat(); // из массива массивов делаем массив
+
+    res.json([...new Set(tags)]); // отдаем только уникальныее тэги
+  } catch (error) {
+    res.status(500).json({ message: 'Не удалось создать статью' });
+    console.log(error);
+  }
+};

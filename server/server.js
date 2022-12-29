@@ -19,6 +19,7 @@ import {
   getOnePost,
   deletePost,
   updatePost,
+  getLastTags,
 } from './controllers/PostController.js';
 
 mongoose
@@ -72,6 +73,7 @@ app.post('/upload', checkAuth, upload.single('image'), (req, res) => {
 });
 
 app.get('/posts', getAllPosts);
+app.get('/posts/tags', getLastTags);
 app.get('/posts/:id', getOnePost);
 app.post(
   '/posts',
