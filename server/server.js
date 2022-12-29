@@ -1,5 +1,7 @@
 import express from 'express';
 import multer from 'multer';
+import cors from 'cors';
+
 import mongoose from 'mongoose';
 
 import checkAuth from './utils/checkAuth.js';
@@ -45,6 +47,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 app.use(express.json());
+app.use(cors());
 
 // чтобы при запросе /uploads/картинка.jpg находило файл в нужной папке
 app.use('/uploads', express.static('./server/uploads'));
