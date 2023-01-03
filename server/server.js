@@ -1,5 +1,8 @@
 import express from 'express';
 import multer from 'multer';
+import cors from 'cors';
+import fs from 'fs';
+
 import mongoose from 'mongoose';
 
 import checkAuth from './utils/checkAuth.js';
@@ -17,6 +20,7 @@ import {
   getOnePost,
   deletePost,
   updatePost,
+  getLastTags,
 } from './controllers/PostController.js';
 
 mongoose
@@ -33,6 +37,9 @@ const storage = multer.diskStorage({
   //когда будет любой файл загружаться, выполнится функция
   // которая вернет путь к файлу
   destination: (_, __, cb) => {
+    if (!fs.existsSync('./server/uploads')) {
+      fs.mkdirSync('./server/uploads');
+    }
     cb(null, './server/uploads');
   },
   // перед тем как этот файл сохранить,
@@ -45,6 +52,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 app.use(express.json());
+app.use(cors());
 
 // чтобы при запросе /uploads/картинка.jpg находило файл в нужной папке
 app.use('/uploads', express.static('./server/uploads'));
@@ -69,6 +77,7 @@ app.post('/upload', checkAuth, upload.single('image'), (req, res) => {
 });
 
 app.get('/posts', getAllPosts);
+app.get('/posts/tags', getLastTags);
 app.get('/posts/:id', getOnePost);
 app.post(
   '/posts',
