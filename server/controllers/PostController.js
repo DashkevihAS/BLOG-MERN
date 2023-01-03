@@ -40,7 +40,7 @@ export const getOnePost = async (req, res) => {
 
         res.json(doc);
       },
-    );
+    ).populate('user');
   } catch (error) {
     res.status(500).json({ message: 'Не удалось получить статью' });
     console.log(error);
@@ -62,8 +62,8 @@ export const deletePost = async (req, res) => {
         if (!doc) {
           return res.status(404).json({ message: 'Статья не найдена' });
         }
-
-        res.json({ success: true });
+        console.log(doc);
+        res.json({ id: postId, success: true });
       },
     );
   } catch (error) {
@@ -78,7 +78,7 @@ export const createPost = async (req, res) => {
       title: req.body.title,
       text: req.body.text,
       imageUrl: req.body.imageUrl,
-      tags: req.body.tags,
+      tags: req.body.tags.replace(' ', '').split(','),
       user: req.userId,
     });
 
@@ -101,12 +101,12 @@ export const updatePost = async (req, res) => {
         title: req.body.title,
         text: req.body.text,
         imageUrl: req.body.imageUrl,
-        tags: req.body.tags,
+        tags: req.body.tags.replace(' ', '').split(','),
         user: req.userId,
       },
     );
 
-    res.json({ success: true });
+    res.json({ _id: postId, success: true });
   } catch (error) {
     res.status(500).json({ message: 'Не удалось обновить статью' });
     console.log(error);
