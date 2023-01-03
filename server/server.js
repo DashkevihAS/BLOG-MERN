@@ -1,6 +1,7 @@
 import express from 'express';
 import multer from 'multer';
 import cors from 'cors';
+import fs from 'fs';
 
 import mongoose from 'mongoose';
 
@@ -36,6 +37,9 @@ const storage = multer.diskStorage({
   //когда будет любой файл загружаться, выполнится функция
   // которая вернет путь к файлу
   destination: (_, __, cb) => {
+    if (!fs.existsSync('./server/uploads')) {
+      fs.mkdirSync('./server/uploads');
+    }
     cb(null, './server/uploads');
   },
   // перед тем как этот файл сохранить,
